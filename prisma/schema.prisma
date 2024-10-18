@@ -49,6 +49,7 @@ model User {
   Order         Order[]
 }
 
+
 model VerificationToken {
   identifier String
   token      String   @unique

@@ -6,12 +6,12 @@ const data = [
   {
     id: 1,
     title: "always fresh & always crispy & always hot",
-    image: "/slide1.png",
+    image: "/slide1.jpg",
   },
   {
     id: 2,
     title: "we deliver your order wherever you are in NY",
-    image: "/slide2.png",
+    image: "/slide2.jpg",
   },
   {
     id: 3,

@@ -21,6 +21,8 @@ const Price = ({ product }: { product: ProductType }) => {
       setTotal(
         quantity * product.price + product.options[selected].additionalPrice
       );
+    } else {
+      setTotal(quantity * product.price); // if no options, only calculate based on quantity
     }
   }, [quantity, selected, product]);
 
