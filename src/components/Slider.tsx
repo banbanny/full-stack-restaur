@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 
 const data = [
   {
@@ -21,6 +22,7 @@ const data = [
 ];
 
 const Slider = () => {
+  const router = useRouter(); // Initialize useRouter
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -39,7 +41,12 @@ const Slider = () => {
         <h1 className="text-5xl text-center uppercase p-4 md:p-10 md:text-6xl xl:text-7xl">
           {data[currentSlide].title}
         </h1>
-        <button className="bg-red-500 text-white py-4 px-8">Order Now</button>
+        <button
+          onClick={() => router.push("/login")} // Add onClick handler
+          className="bg-red-500 text-white py-4 px-8"
+        >
+          Order Now
+        </button>
       </div>
       {/* IMAGE CONTAINER */}
       <div className="w-full flex-1 relative">

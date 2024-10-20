@@ -1,7 +1,8 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions, User, getServerSession } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials"; // Make sure to import this
 import { prisma } from "./connect";
+import bcrypt from "bcrypt"; 
 
 declare module "next-auth" {
   interface Session {
@@ -22,11 +23,24 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   providers: [
-    GoogleProvider({
-      // clientId: process.env.GOOGLE_ID as string,
-      // clientSecret: process.env.GOOGLE_SECRET as string,
-      clientId: process.env.GOOGLE_ID!,
-      clientSecret: process.env.GOOGLE_SECRET!,
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        // Authorization logic here (check email and password)
+        const user = await prisma.user.findUnique({
+          where: { email: credentials?.email },
+        });
+
+        // Add your password validation logic here (e.g., bcrypt)
+        if (user && user.password === credentials?.password) {
+          return user;
+        }
+        return null; // Return null if user not found or password is incorrect
+      },
     }),
   ],
   callbacks: {
@@ -38,9 +52,7 @@ export const authOptions: NextAuthOptions = {
     },
     async jwt({ token }) {
       const userInDb = await prisma.user.findUnique({
-        where: {
-          email: token.email!,
-        },
+        where: { email: token.email! },
       });
       token.isAdmin = userInDb?.isAdmin!;
       return token;
