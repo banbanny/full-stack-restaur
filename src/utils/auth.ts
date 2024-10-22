@@ -2,7 +2,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions, User, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"; // Make sure to import this
 import { prisma } from "./connect";
-import bcrypt from "bcrypt"; 
+
 
 declare module "next-auth" {
   interface Session {
