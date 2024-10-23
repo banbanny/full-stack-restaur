@@ -3,7 +3,7 @@
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const LoginPage = () => {
   const { status } = useSession();
@@ -15,13 +15,17 @@ const LoginPage = () => {
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // Add loading state
 
   // Redirect to homepage if already authenticated
-  if (status === "authenticated") {
-    router.push("/");
-  }
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
 
   const handleEmailLogin = async () => {
+    setLoading(true);
     const result = await signIn("credentials", { email, password, redirect: false });
 
     // If there was an error during login, display the error
@@ -29,62 +33,43 @@ const LoginPage = () => {
       setError("Invalid credentials, please try again.");
     } else {
       router.push("/"); // Redirect to homepage on successful login
+    } 
+    setLoading(false);
+  };
+
+  const handleRegister = async () => {
+    if (registerPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: registerEmail,
+          password: registerPassword,
+        }),
+      });
+  
+      if (response.ok) {
+        setError("User registered successfully! Logging you in...");
+        
+        await handleEmailLogin(); // Check if this is correctly logging in the new user
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Registration failed, please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      setError("An error occurred, please try again.");
+    } finally {
+      setLoading(false);
     }
   };
-
-  // const handleRegister = async () => {
-  //   if (registerPassword !== confirmPassword) {
-  //     setError("Passwords do not match.");
-  //     return;
-  //   }
-  //   try {
-  //     const response = await fetch("/api/register", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         email: registerEmail,
-  //         password: registerPassword,
-  //       }),
-  //     });
-
-  //     if (response.ok) {
-  //       // Automatically log in the user after successful registration
-  //       await handleEmailLogin();
-  //     } else {
-  //       setError("Registration failed, please try again.");
-  //     }
-  //   } catch (error) {
-  //     setError("An error occurred, please try again.");
-  //   }
-  // };
-
-  const handleRegister = async () => {  
-    if (registerPassword !== confirmPassword) {  
-      setError("Passwords do not match.");  
-      return;  
-    }  
-    
-    try {  
-      const response = await fetch("/api/register", {  
-        method: "POST",  
-        headers: { "Content-Type": "application/json" },  
-        body: JSON.stringify({  
-          email: registerEmail,  
-          password: registerPassword,  
-        }),  
-      });  
   
-      if (response.ok) {  
-        await handleEmailLogin();  
-      } else {  
-        const errorData = await response.json();  
-        setError(errorData.message || "Registration failed, please try again.");  
-      }  
-    } catch (error) {  
-      console.error(error);  
-      setError("An error occurred, please try again.");  
-    }  
-  };
 
   return (
     <div className="p-4 h-[calc(100vh-6rem)] md:h-[calc(100vh-9rem)] flex items-center justify-center">
@@ -109,6 +94,7 @@ const LoginPage = () => {
                 value={registerEmail}
                 onChange={(e) => setRegisterEmail(e.target.value)}
                 className="p-3 ring-1 ring-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                required
               />
               <input
                 type="password"
@@ -116,6 +102,7 @@ const LoginPage = () => {
                 value={registerPassword}
                 onChange={(e) => setRegisterPassword(e.target.value)}
                 className="p-3 ring-1 ring-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                required
               />
               <input
                 type="password"
@@ -123,12 +110,14 @@ const LoginPage = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="p-3 ring-1 ring-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                required
               />
               <button
                 onClick={handleRegister}
                 className="p-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                disabled={loading} // Disable button while loading
               >
-                Register
+                {loading ? "Registering..." : "Register"}
               </button>
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
@@ -146,6 +135,7 @@ const LoginPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="p-3 ring-1 ring-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                required
               />
               <input
                 type="password"
@@ -153,12 +143,14 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="p-3 ring-1 ring-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+                required
               />
               <button
                 onClick={handleEmailLogin}
                 className="p-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                disabled={loading} // Disable button while loading
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </button>
 
               <p className="text-sm">

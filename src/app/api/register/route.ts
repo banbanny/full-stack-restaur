@@ -1,10 +1,10 @@
 import { prisma } from "@/utils/connect";
-import { NextApiRequest, NextApiResponse } from "next";
-import bcrypt from "bcrypt";  
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
-    const { email, password } = req.body;
+// Handle POST request for user registration
+export async function POST(req: Request) {
+  try {
+    const { email, password } = await req.json();
 
     // Check if the user already exists
     const existingUser = await prisma.user.findUnique({
@@ -12,27 +12,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return NextResponse.json({ message: "User already exists" }, { status: 400 });
     }
 
-    // Hash the password before saving it
-    const hashedPassword = await bcrypt.hash(password, 10);  // Same API as bcrypt
+    // Create a new user in the database without hashing the password
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        password, // Store the password in plaintext
+      },
+    });
 
-    try {
-      // Create a new user in the database
-      const newUser = await prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword, // Store the hashed password
-        },
-      });
-
-      return res.status(201).json({ message: "User registered successfully", user: newUser });
-    } catch (error) {
-      return res.status(500).json({ message: "Error registering user" });
-    }
-  } else {
-    res.setHeader("Allow", ["POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return NextResponse.json(
+      { message: "User registered successfully", user: newUser },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Registration error:', error);
+    return NextResponse.json({ message: "Error registering user" }, { status: 500 });
   }
 }
