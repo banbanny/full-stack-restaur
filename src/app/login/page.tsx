@@ -154,7 +154,7 @@ const LoginPage = () => {
               </button>
 
               <p className="text-sm">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <button className="underline text-blue-600" onClick={() => setShowRegister(true)}>
                   Register
                 </button>
