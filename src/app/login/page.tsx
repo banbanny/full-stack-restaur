@@ -154,6 +154,7 @@ const LoginPage = () => {
               </button>
 
               <p className="text-sm">
+              {/* eslint-disable react/no-unescaped-entities */}
                 Dont have an account?{" "}
                 <button className="underline text-blue-600" onClick={() => setShowRegister(true)}>
                   Register
