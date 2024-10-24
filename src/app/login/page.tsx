@@ -15,6 +15,7 @@ const LoginPage = () => {
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false); // Add loading state
 
   // Redirect to homepage if already authenticated
@@ -28,46 +29,62 @@ const LoginPage = () => {
     setLoading(true);
     const result = await signIn("credentials", { email, password, redirect: false });
 
-    // If there was an error during login, display the error
     if (result?.error) {
       setError("Invalid credentials, please try again.");
+      setSuccessMessage("");
     } else {
+      setError("");
+      setSuccessMessage("Login successful! Redirecting...");
       router.push("/"); // Redirect to homepage on successful login
-    } 
+    }
     setLoading(false);
   };
 
-  const [successMessage, setSuccessMessage] = useState("User registered successfully");
-  const handleRegister = async () => {
+  const handlegister = async () => {
     if (registerPassword !== confirmPassword) {
       setError("Passwords do not match.");
+      setSuccessMessage("");
       return;
     }
-    // Optionally add password strength validation here
-
+  
+    // Extract default name from email (part before '@')
+    const defaultName = registerEmail.split('@')[0];
+  
     try {
-      setLoading(true); // Set loading state to true
+      setLoading(true);
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: registerEmail,
           password: registerPassword,
+          name: defaultName, // Pass the default name
         }),
       });
-
+  
       if (response.ok) {
+        setSuccessMessage("User registered successfully. Logging in...");
+        setError("");
         await handleEmailLogin();
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Registration failed, please try again.");
+        setSuccessMessage("");
       }
     } catch (error) {
       console.error(error);
       setError("An error occurred, please try again.");
+      setSuccessMessage("");
     } finally {
-      setLoading(false); // Ensure loading state is reset
+      setLoading(false);
     }
+  };
+
+  // Reset error and success messages when switching between login/register
+  const toggleForm = () => {
+    setShowRegister(!showRegister);
+    setError("");
+    setSuccessMessage("");
   };
 
   return (
@@ -78,11 +95,18 @@ const LoginPage = () => {
         </div>
 
         <div className="p-10 flex flex-col gap-8 md:w-1/2">
-          <h1 className="font-bold text-xl xl:text-3xl">{showRegister ? "Create an Account" : "Welcome"}</h1>
-          <p>{showRegister ? "Fill in your details to create a new account." : "Log into your account using your email"}</p>
+          <h1 className="font-bold text-xl xl:text-3xl">
+            {showRegister ? "Create an Account" : "Welcome"}
+          </h1>
+          <p>
+            {showRegister
+              ? "Fill in your details to create a new account."
+              : "Log into your account using your email"}
+          </p>
 
-          {/* Display error message */}
+          {/* Display error or success message */}
           {error && <p className="text-red-500">{error}</p>}
+          {successMessage && <p className="text-green-500">{successMessage}</p>}
 
           {showRegister ? (
             // Registration Form
@@ -114,13 +138,13 @@ const LoginPage = () => {
               <button
                 onClick={handleRegister}
                 className="p-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                disabled={loading} // Disable button while loading
+                disabled={loading}
               >
                 {loading ? "Registering..." : "Register"}
               </button>
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
-                <button className="underline text-blue-600" onClick={() => setShowRegister(false)}>
+                <button className="underline text-blue-600" onClick={toggleForm}>
                   Sign in
                 </button>
               </p>
@@ -147,14 +171,14 @@ const LoginPage = () => {
               <button
                 onClick={handleEmailLogin}
                 className="p-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                disabled={loading} // Disable button while loading
+                disabled={loading}
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
 
               <p className="text-sm">
-                Don&apost have an account?{" "}
-                <button className="underline text-blue-600" onClick={() => setShowRegister(true)}>
+                Don't have an account?{" "}
+                <button className="underline text-blue-600" onClick={toggleForm}>
                   Register
                 </button>
               </p>

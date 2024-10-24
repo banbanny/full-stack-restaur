@@ -1,5 +1,6 @@
 import { prisma } from "@/utils/connect";
 import { NextResponse } from "next/server";
+import bcrypt from "bcrypt"; // Import bcrypt for password hashing
 
 // Handle POST request for user registration
 export async function POST(req: Request) {
@@ -15,11 +16,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "User already exists" }, { status: 400 });
     }
 
-    // Create a new user in the database without hashing the password
+    // Hash the password before saving to the database
+    const hashedPassword = await bcrypt.hash(password, 10); // Salt rounds: 10
+
+    // Create a new user in the database with the hashed password
     const newUser = await prisma.user.create({
       data: {
         email,
-        password, // Store the password in plaintext
+        password: hashedPassword, // Store the hashed password
       },
     });
 
