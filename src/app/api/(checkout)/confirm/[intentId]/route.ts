@@ -1,18 +1,26 @@
 import { prisma } from "@/utils/connect";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export const PUT = async (req: NextRequest, { params }: { params: { intentId: string } }) => {
-  console.log("Received intentId:", params.intentId); // Add logs to debug
+export const PUT = async ({ params }: { params: { intentId: string } }) => {
+  const { intentId } = params;
 
   try {
-    const updatedOrder = await prisma.order.update({
-      where: { intent_id: params.intentId },
+    await prisma.order.update({
+      where: {
+        intent_id: intentId,
+      },
+      
       data: { status: "Being prepared!" },
     });
-    console.log("Order updated successfully:", updatedOrder); // Add log for success
-    return NextResponse.json({ message: "Order has been updated" }, { status: 200 });
+    return new NextResponse(
+      JSON.stringify({ message: "Order has been updated" }),
+      { status: 200 }
+    );
   } catch (err) {
-    console.log("Error occurred during Prisma query:", err); // Log error
-    return NextResponse.json({ message: "Something went wrong!" }, { status: 500 });
+    console.log(err);
+    return new NextResponse(
+      JSON.stringify({ message: "Something went wrong!" }),
+      { status: 500 }
+    );
   }
 };
