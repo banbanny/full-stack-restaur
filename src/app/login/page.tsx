@@ -47,7 +47,7 @@ const LoginPage = () => {
       return;
     }
 
-    // Extract default name from email (part before '@')
+    // Extract default name from email 
     const defaultName = registerEmail.split('@')[0];
 
     try {
