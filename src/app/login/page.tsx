@@ -40,16 +40,16 @@ const LoginPage = () => {
     setLoading(false);
   };
 
-  const handlegister = async () => {
+  const handleRegister = async () => {
     if (registerPassword !== confirmPassword) {
       setError("Passwords do not match.");
       setSuccessMessage("");
       return;
     }
-  
+
     // Extract default name from email (part before '@')
     const defaultName = registerEmail.split('@')[0];
-  
+
     try {
       setLoading(true);
       const response = await fetch("/api/register", {
@@ -61,7 +61,7 @@ const LoginPage = () => {
           name: defaultName, // Pass the default name
         }),
       });
-  
+
       if (response.ok) {
         setSuccessMessage("User registered successfully. Logging in...");
         setError("");
@@ -177,11 +177,12 @@ const LoginPage = () => {
               </button>
 
               <p className="text-sm">
-                Don't have an account?{" "}
+                Don&#39;t have an account?{" "}
                 <button className="underline text-blue-600" onClick={toggleForm}>
                   Register
                 </button>
               </p>
+
             </div>
           )}
         </div>
