@@ -37,14 +37,16 @@ const LoginPage = () => {
     setLoading(false);
   };
 
+  const [successMessage, setSuccessMessage] = useState("User registered successfully");
   const handleRegister = async () => {
     if (registerPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-  
+    // Optionally add password strength validation here
+
     try {
-      setLoading(true);
+      setLoading(true); // Set loading state to true
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,11 +55,9 @@ const LoginPage = () => {
           password: registerPassword,
         }),
       });
-  
+
       if (response.ok) {
-        setError("User registered successfully! Logging you in...");
-        
-        await handleEmailLogin(); // Check if this is correctly logging in the new user
+        await handleEmailLogin();
       } else {
         const errorData = await response.json();
         setError(errorData.message || "Registration failed, please try again.");
@@ -66,10 +66,9 @@ const LoginPage = () => {
       console.error(error);
       setError("An error occurred, please try again.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure loading state is reset
     }
   };
-  
 
   return (
     <div className="p-4 h-[calc(100vh-6rem)] md:h-[calc(100vh-9rem)] flex items-center justify-center">
@@ -154,8 +153,7 @@ const LoginPage = () => {
               </button>
 
               <p className="text-sm">
-              {/* eslint-disable react/no-unescaped-entities */}
-                Dont have an account?{" "}
+                Don&apost have an account?{" "}
                 <button className="underline text-blue-600" onClick={() => setShowRegister(true)}>
                   Register
                 </button>
