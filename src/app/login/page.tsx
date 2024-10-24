@@ -177,7 +177,7 @@ const LoginPage = () => {
               </button>
 
               <p className="text-sm">
-                Dont have an account?{" "}
+                You Dont have an account?{" "}
                 <button className="underline text-blue-600" onClick={toggleForm}>
                   Register
                 </button>
